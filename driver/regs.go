@@ -20,18 +20,18 @@ func getReg32(addr []byte, reg int) uint32 {
 }
 
 func setFlags32(addr []byte, reg int, flags uint32) {
-	setReg32(addr, reg, getReg32(addr, reg) | flags)
+	setReg32(addr, reg, getReg32(addr, reg)|flags)
 }
 
 func clearFlags32(addr []byte, reg int, flags uint32) {
-	setReg32(addr, reg, getReg32(addr, reg) &^ flags)
+	setReg32(addr, reg, getReg32(addr, reg)&^flags)
 }
 
 func waitClearReg32(addr []byte, reg int, mask uint32) {
 	cur := atomic.LoadUint32((*uint32)(unsafe.Pointer(&addr[reg])))
 	for (cur & mask) != 0 {
 		fmt.Printf("waiting for flags %#x in register %#x to clear, current value %#x", mask, reg, cur)
-		time.Sleep(10000*time.Microsecond)
+		time.Sleep(10000 * time.Microsecond)
 		cur = atomic.LoadUint32((*uint32)(unsafe.Pointer(&addr[reg])))
 	}
 }
@@ -40,7 +40,7 @@ func waitSetReg32(addr []byte, reg int, mask uint32) {
 	cur := atomic.LoadUint32((*uint32)(unsafe.Pointer(&addr[reg])))
 	for (cur & mask) != mask {
 		fmt.Printf("waiting for flags %#x in register %#x to clear, current value %#x", mask, reg, cur)
-		time.Sleep(10000*time.Microsecond)
+		time.Sleep(10000 * time.Microsecond)
 		cur = atomic.LoadUint32((*uint32)(unsafe.Pointer(&addr[reg])))
 	}
 }
