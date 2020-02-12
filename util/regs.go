@@ -1,4 +1,4 @@
-package driver
+package util
 
 import (
 	"fmt"
@@ -11,23 +11,23 @@ import (
 
 //map C functions to Go
 
-func setReg32(addr []byte, reg int, value uint32) {
+func SetReg32(addr []byte, reg int, value uint32) {
 	atomic.StoreUint32((*uint32)(unsafe.Pointer(&addr[reg])), value)
 }
 
-func getReg32(addr []byte, reg int) uint32 {
+func GetReg32(addr []byte, reg int) uint32 {
 	return atomic.LoadUint32((*uint32)(unsafe.Pointer(&addr[reg])))
 }
 
-func setFlags32(addr []byte, reg int, flags uint32) {
-	setReg32(addr, reg, getReg32(addr, reg)|flags)
+func SetFlags32(addr []byte, reg int, flags uint32) {
+	SetReg32(addr, reg, GetReg32(addr, reg)|flags)
 }
 
-func clearFlags32(addr []byte, reg int, flags uint32) {
-	setReg32(addr, reg, getReg32(addr, reg)&^flags)
+func ClearFlags32(addr []byte, reg int, flags uint32) {
+	SetReg32(addr, reg, GetReg32(addr, reg)&^flags)
 }
 
-func waitClearReg32(addr []byte, reg int, mask uint32) {
+func WaitClearReg32(addr []byte, reg int, mask uint32) {
 	cur := atomic.LoadUint32((*uint32)(unsafe.Pointer(&addr[reg])))
 	for (cur & mask) != 0 {
 		fmt.Printf("waiting for flags %#x in register %#x to clear, current value %#x", mask, reg, cur)
@@ -36,7 +36,7 @@ func waitClearReg32(addr []byte, reg int, mask uint32) {
 	}
 }
 
-func waitSetReg32(addr []byte, reg int, mask uint32) {
+func WaitSetReg32(addr []byte, reg int, mask uint32) {
 	cur := atomic.LoadUint32((*uint32)(unsafe.Pointer(&addr[reg])))
 	for (cur & mask) != mask {
 		fmt.Printf("waiting for flags %#x in register %#x to clear, current value %#x", mask, reg, cur)
@@ -46,27 +46,27 @@ func waitSetReg32(addr []byte, reg int, mask uint32) {
 }
 
 //getter for pci io port resources
-func readIo32(fd *os.File, offset uint) uint32 {
+func ReadIo32(fd *os.File, offset uint) uint32 {
 	fd.Sync()
 	b := make([]byte, 4)
 	n, err := fd.ReadAt(b, int64(offset))
 	if err != nil || n < len(b) {
 		log.Fatalf("Pci read wrong offset")
 	}
-	return hostOrder.Uint32(b)
+	return HostOrder.Uint32(b)
 }
 
-func readIo16(fd *os.File, offset uint) uint16 {
+func ReadIo16(fd *os.File, offset uint) uint16 {
 	fd.Sync()
 	b := make([]byte, 2)
 	n, err := fd.ReadAt(b, int64(offset))
 	if err != nil || n < len(b) {
 		log.Fatalf("Pci read wrong offset")
 	}
-	return hostOrder.Uint16(b)
+	return HostOrder.Uint16(b)
 }
 
-func readIo8(fd *os.File, offset uint) uint8 {
+func ReadIo8(fd *os.File, offset uint) uint8 {
 	fd.Sync()
 	b := make([]byte, 1)
 	n, err := fd.ReadAt(b, int64(offset))
@@ -79,7 +79,7 @@ func readIo8(fd *os.File, offset uint) uint8 {
 //setter for pci io port resources
 func writeIo32(fd *os.File, value uint32, offset uint) {
 	b := make([]byte, 4)
-	hostOrder.PutUint32(b, value)
+	HostOrder.PutUint32(b, value)
 	n, err := fd.WriteAt(b, int64(offset))
 	if err != nil || n < len(b) {
 		log.Fatalf("Pci write wrong offset")
@@ -87,9 +87,9 @@ func writeIo32(fd *os.File, value uint32, offset uint) {
 	fd.Sync()
 }
 
-func writeIo16(fd *os.File, value uint16, offset uint) {
+func WriteIo16(fd *os.File, value uint16, offset uint) {
 	b := make([]byte, 2)
-	hostOrder.PutUint16(b, value)
+	HostOrder.PutUint16(b, value)
 	n, err := fd.WriteAt(b, int64(offset))
 	if err != nil || n < len(b) {
 		log.Fatalf("Pci write wrong offset")
@@ -97,7 +97,7 @@ func writeIo16(fd *os.File, value uint16, offset uint) {
 	fd.Sync()
 }
 
-func writeIo8(fd *os.File, value uint8, offset uint) {
+func WriteIo8(fd *os.File, value uint8, offset uint) {
 	b := make([]byte, 1)
 	b[0] = byte(value)
 	n, err := fd.WriteAt(b, int64(offset))

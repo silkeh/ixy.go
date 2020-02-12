@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"time"
 	"unsafe"
+
+	"github.com/ixy-languages/ixy.go/util"
 )
 
 const (
@@ -46,7 +48,7 @@ func virtToPhys(virt uintptr) uintptr {
 	if err != nil {
 		log.Fatalf("Error translating address: %v", err)
 	}
-	phy := uintptr(hostOrder.Uint64(rbuf))
+	phy := uintptr(util.HostOrder.Uint64(rbuf))
 	if phy == 0 {
 		log.Fatalf("failed to translate virtual address %#v to physical address", virt)
 	}

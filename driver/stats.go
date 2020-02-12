@@ -40,12 +40,12 @@ func (stats *DeviceStats) Rate(old *DeviceStats, dt time.Duration) (rxpps, txpps
 	return
 }
 
-//PrintStats prints stats
+// PrintStats prints stats
 func (stats *DeviceStats) PrintStats() {
 	dev := stats.device.getIxyDev()
 	var addr string
 	if stats.device != nil {
-		addr = dev.PciAddr
+		addr = dev.PCI.Addr
 	} else {
 		addr = "???"
 	}
@@ -53,28 +53,28 @@ func (stats *DeviceStats) PrintStats() {
 	fmt.Printf("[%v] TX: %v bytes %v packets\n", addr, stats.TXBytes, stats.TXPackets)
 }
 
-//PrintStatsDiff get difference between reciever and previous stats
+// PrintStatsDiff get difference between reciever and previous stats
 func (stats *DeviceStats) PrintStatsDiff(statsOld *DeviceStats, nanos time.Duration) {
 	rxpps, txpps, rxBps, txBps := stats.Rate(statsOld, nanos)
 	oldDev := statsOld.device.getIxyDev()
 	newDev := stats.device.getIxyDev()
 	var addr string
 	if statsOld.device != nil {
-		addr = oldDev.PciAddr
+		addr = oldDev.PCI.Addr
 	} else {
 		addr = "???"
 	}
 	fmt.Printf("[%v] RX: %v Mbit/s %.2f Mpps\n", addr, rxBps/1e6, rxpps/1e6)
 
 	if stats.device != nil {
-		addr = newDev.PciAddr
+		addr = newDev.PCI.Addr
 	} else {
 		addr = "???"
 	}
 	fmt.Printf("[%v] TX: %v Mbit/s %.2f Mpps\n", addr, txBps/1e6, txpps/1e6)
 }
 
-//StatsInit initialize device stats
+// StatsInit initialize device stats
 func (stats *DeviceStats) StatsInit(dev IxyInterface) {
 	stats.Reset()
 	stats.device = dev
