@@ -1,13 +1,12 @@
 package driver
 
 import (
-	"os"
-	"unsafe"
-	"sync/atomic"
 	"fmt"
-	"time"
-	"encoding/binary"
 	"log"
+	"os"
+	"sync/atomic"
+	"time"
+	"unsafe"
 )
 
 //map C functions to Go
@@ -54,10 +53,7 @@ func readIo32(fd *os.File, offset uint) uint32 {
 	if err != nil || n < len(b) {
 		log.Fatalf("Pci read wrong offset")
 	}
-	if isBig {
-		return binary.BigEndian.Uint32(b)
-	}
-	return binary.LittleEndian.Uint32(b)
+	return hostOrder.Uint32(b)
 }
 
 func readIo16(fd *os.File, offset uint) uint16 {
@@ -67,10 +63,7 @@ func readIo16(fd *os.File, offset uint) uint16 {
 	if err != nil || n < len(b) {
 		log.Fatalf("Pci read wrong offset")
 	}
-	if isBig {
-		return binary.BigEndian.Uint16(b)
-	}
-	return binary.LittleEndian.Uint16(b)
+	return hostOrder.Uint16(b)
 }
 
 func readIo8(fd *os.File, offset uint) uint8 {
@@ -86,11 +79,7 @@ func readIo8(fd *os.File, offset uint) uint8 {
 //setter for pci io port resources
 func writeIo32(fd *os.File, value uint32, offset uint) {
 	b := make([]byte, 4)
-	if isBig {
-		binary.BigEndian.PutUint32(b, value)
-	} else {
-		binary.LittleEndian.PutUint32(b, value)
-	}
+	hostOrder.PutUint32(b, value)
 	n, err := fd.WriteAt(b, int64(offset))
 	if err != nil || n < len(b) {
 		log.Fatalf("Pci write wrong offset")
@@ -100,11 +89,7 @@ func writeIo32(fd *os.File, value uint32, offset uint) {
 
 func writeIo16(fd *os.File, value uint16, offset uint) {
 	b := make([]byte, 2)
-	if isBig {
-		binary.BigEndian.PutUint16(b, value)
-	} else {
-		binary.LittleEndian.PutUint16(b, value)
-	}
+	hostOrder.PutUint16(b, value)
 	n, err := fd.WriteAt(b, int64(offset))
 	if err != nil || n < len(b) {
 		log.Fatalf("Pci write wrong offset")

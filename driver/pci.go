@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"encoding/binary"
 	"fmt"
 	"log"
 	"os"
@@ -36,18 +35,9 @@ func enableDma(pciAddr string) {
 	if err != nil {
 		log.Fatalf("Error reading from config: %v", err)
 	}
-	var dmaInt uint16
-	if isBig {
-		dmaInt = binary.BigEndian.Uint16(dma)
-	} else {
-		dmaInt = binary.LittleEndian.Uint16(dma)
-	}
+	dmaInt := hostOrder.Uint16(dma)
 	dmaInt |= 1 << 2
-	if isBig {
-		binary.BigEndian.PutUint16(dma, dmaInt)
-	} else {
-		binary.LittleEndian.PutUint16(dma, dmaInt)
-	}
+	hostOrder.PutUint16(dma, dmaInt)
 	_, err = fd.WriteAt(dma, 4)
 	if err != nil {
 		log.Fatalf("Error writing dma flag to config: %v\n", err)

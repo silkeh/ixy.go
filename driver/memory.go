@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"encoding/binary"
 	"fmt"
 	"log"
 	"math/rand"
@@ -47,12 +46,7 @@ func virtToPhys(virt uintptr) uintptr {
 	if err != nil {
 		log.Fatalf("Error translating address: %v", err)
 	}
-	var phy uintptr
-	if isBig {
-		phy = uintptr(binary.BigEndian.Uint64(rbuf))
-	} else {
-		phy = uintptr(binary.LittleEndian.Uint64(rbuf))
-	}
+	phy := uintptr(hostOrder.Uint64(rbuf))
 	if phy == 0 {
 		log.Fatalf("failed to translate virtual address %#v to physical address", virt)
 	}
